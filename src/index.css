@@ -87,20 +87,6 @@ body {
   padding-top: 1.25rem;
 }
 
-@media (max-width: 959px) {
-  body {
-    overflow: hidden;
-  }
-
-  .mobile-blocker {
-    display: flex;
-  }
-
-  .layout {
-    display: none;
-  }
-}
-
 .layout {
   min-height: 100vh;
   min-width: 960px;
@@ -612,4 +598,18 @@ body {
 .modal-action-delete:hover {
   background: rgba(231, 76, 60, 0.1);
   border-color: var(--color-danger);
+}
+
+@media (max-width: 959px) {
+  body {
+    overflow: hidden;
+  }
+
+  .mobile-blocker {
+    display: flex;
+  }
+
+  .layout {
+    display: none;
+  }
 }
