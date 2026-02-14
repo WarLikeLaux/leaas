@@ -91,7 +91,7 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
         {CATEGORIES.map((cat) => {
           const items = groups.get(cat.value)
           if (!items || items.length === 0) return null
-          const isOpen = expanded.has(cat.value)
+          const isOpen = search.trim() !== '' || expanded.has(cat.value)
           const catMonthly = items.reduce(
             (sum, e) => sum + calculateMonthlyCost(e.cost, e.lifespanDays),
             0,
