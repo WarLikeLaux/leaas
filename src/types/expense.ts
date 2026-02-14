@@ -1,0 +1,50 @@
+export interface Expense {
+  id: string
+  name: string
+  cost: number
+  lifespanDays: number
+  category: ExpenseCategory
+  createdAt: string
+}
+
+export type ExpenseCategory =
+  | 'food'
+  | 'household'
+  | 'clothing'
+  | 'tech'
+  | 'transport'
+  | 'health'
+  | 'subscriptions'
+  | 'other'
+
+export type Period = 'days' | 'months' | 'years'
+
+export const DAYS_IN_MONTH = 30.44
+export const DAYS_IN_YEAR = 365.25
+
+export interface CategoryInfo {
+  value: ExpenseCategory
+  label: string
+  icon: string
+}
+
+export const CATEGORIES: CategoryInfo[] = [
+  { value: 'food', label: 'Еда', icon: '🍞' },
+  { value: 'household', label: 'Быт', icon: '🏠' },
+  { value: 'clothing', label: 'Одежда', icon: '👕' },
+  { value: 'tech', label: 'Техника', icon: '💻' },
+  { value: 'transport', label: 'Транспорт', icon: '🚗' },
+  { value: 'health', label: 'Здоровье', icon: '💊' },
+  { value: 'subscriptions', label: 'Подписки', icon: '📱' },
+  { value: 'other', label: 'Другое', icon: '📦' },
+]
+
+export function getCategoryInfo(category: ExpenseCategory): CategoryInfo {
+  return (
+    CATEGORIES.find((c) => c.value === category) ?? {
+      value: 'other',
+      label: 'Другое',
+      icon: '📦',
+    }
+  )
+}
