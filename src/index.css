@@ -88,6 +88,10 @@ body {
 }
 
 @media (max-width: 959px) {
+  body {
+    overflow: hidden;
+  }
+
   .mobile-blocker {
     display: flex;
   }
