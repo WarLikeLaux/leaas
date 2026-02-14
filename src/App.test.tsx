@@ -2,24 +2,28 @@ import { render, screen } from '@testing-library/react'
 import App from '@/App'
 
 describe('App', () => {
-  it('renders heading', () => {
+  it('отображает заголовок секции', () => {
     render(<App />)
 
-    expect(screen.getByText('Life Expenses')).toBeInTheDocument()
-    expect(screen.getByText('as a Service')).toBeInTheDocument()
+    expect(screen.getByText('Расходы')).toBeInTheDocument()
   })
 
-  it('renders status badge', () => {
+  it('отображает логотип в хедере', () => {
     render(<App />)
 
-    expect(screen.getByText('В разработке')).toBeInTheDocument()
+    expect(screen.getByText('LEaaS')).toBeInTheDocument()
+    expect(screen.getByText('Life Expenses as a Service')).toBeInTheDocument()
   })
 
-  it('renders description', () => {
+  it('отображает мобильную заглушку', () => {
     render(<App />)
 
-    expect(
-      screen.getByText('Финансовый рентген: узнай реальную стоимость своей жизни.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Откройте на компьютере')).toBeInTheDocument()
+  })
+
+  it('отображает пустое состояние при отсутствии расходов', () => {
+    render(<App />)
+
+    expect(screen.getByText('Расходов пока нет. Добавьте первый.')).toBeInTheDocument()
   })
 })
