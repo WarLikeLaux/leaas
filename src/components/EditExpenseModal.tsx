@@ -3,7 +3,6 @@ import { lifespanToDays } from '@/utils/calculations'
 import { pluralizeDays, pluralizeMonths, pluralizeYears } from '@/utils/pluralize'
 import { LIFESPAN_PRESETS } from '@/constants/presets'
 import { CATEGORIES, type Expense, type ExpenseCategory, type Period } from '@/types/expense'
-import { DAYS_IN_MONTH, DAYS_IN_YEAR } from '@/types/expense'
 
 interface EditExpenseModalProps {
   expense: Expense
@@ -20,23 +19,11 @@ function getPeriodLabel(period: Period, count: number): string {
   return pluralizeDays(count)
 }
 
-function daysToInput(days: number): { value: number; period: Period } {
-  if (days >= DAYS_IN_YEAR && days % Math.round(DAYS_IN_YEAR) === 0) {
-    return { value: Math.round(days / DAYS_IN_YEAR), period: 'years' }
-  }
-  if (days >= DAYS_IN_MONTH && days % Math.round(DAYS_IN_MONTH) === 0) {
-    return { value: Math.round(days / DAYS_IN_MONTH), period: 'months' }
-  }
-  return { value: days, period: 'days' }
-}
-
 function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseModalProps) {
-  const initial = daysToInput(expense.lifespanDays)
-
   const [name, setName] = useState(expense.name)
   const [cost, setCost] = useState(String(expense.cost))
-  const [lifespanValue, setLifespanValue] = useState(String(initial.value))
-  const [period, setPeriod] = useState<Period>(initial.period)
+  const [lifespanValue, setLifespanValue] = useState(String(expense.lifespanValue))
+  const [period, setPeriod] = useState<Period>(expense.lifespanPeriod)
   const [category, setCategory] = useState<ExpenseCategory>(expense.category)
 
   const numericLifespan = parseFloat(lifespanValue) || 0
@@ -63,6 +50,8 @@ function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseMod
       name: name.trim(),
       cost: parsedCost,
       lifespanDays: lifespanToDays(parsedLifespan, period),
+      lifespanValue: parsedLifespan,
+      lifespanPeriod: period,
       category,
     })
     onClose()

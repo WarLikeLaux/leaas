@@ -40,6 +40,8 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
       name: name.trim(),
       cost: parsedCost,
       lifespanDays: lifespanToDays(parsedLifespan, period),
+      lifespanValue: parsedLifespan,
+      lifespanPeriod: period,
       category,
     })
 
@@ -58,6 +60,8 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
       name: preset.name,
       cost: preset.cost,
       lifespanDays: preset.lifespanDays,
+      lifespanValue: preset.lifespanValue,
+      lifespanPeriod: preset.lifespanPeriod,
       category: preset.category,
     })
   }

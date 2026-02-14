@@ -5,6 +5,8 @@ export interface ExpensePreset {
   name: string
   cost: number
   lifespanDays: number
+  lifespanValue: number
+  lifespanPeriod: Period
   category: ExpenseCategory
 }
 
@@ -74,6 +76,8 @@ export const EXPENSE_PRESETS: ExpensePreset[] = PRESET_SOURCES.map((s) => ({
   name: s.name,
   cost: s.cost,
   lifespanDays: lifespanToDays(s.lifespan, s.period),
+  lifespanValue: s.lifespan,
+  lifespanPeriod: s.period,
   category: s.category,
 }))
 
