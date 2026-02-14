@@ -22,6 +22,7 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
   const [lifespanValue, setLifespanValue] = useState('')
   const [period, setPeriod] = useState<Period>('months')
   const [category, setCategory] = useState<ExpenseCategory>('other')
+  const [presetsOpen, setPresetsOpen] = useState(false)
 
   const numericLifespan = parseFloat(lifespanValue) || 0
 
@@ -137,17 +138,29 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
         </div>
       </form>
       <div className="form-presets">
-        <span className="form-presets-label">Шаблоны:</span>
-        {EXPENSE_PRESETS.map((preset) => (
-          <button
-            key={preset.name}
-            type="button"
-            className="form-preset"
-            onClick={() => handleExpensePreset(preset)}
-          >
-            {preset.name}
-          </button>
-        ))}
+        <button
+          type="button"
+          className="form-presets-toggle"
+          onClick={() => setPresetsOpen((v) => !v)}
+        >
+          <span>{presetsOpen ? '▼' : '▶'}</span>
+          Шаблоны
+          <span className="form-presets-count">{EXPENSE_PRESETS.length}</span>
+        </button>
+        {presetsOpen && (
+          <div className="form-presets-list">
+            {EXPENSE_PRESETS.map((preset) => (
+              <button
+                key={preset.name}
+                type="button"
+                className="form-preset"
+                onClick={() => handleExpensePreset(preset)}
+              >
+                {preset.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

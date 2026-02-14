@@ -5,7 +5,7 @@ describe('App', () => {
   it('отображает заголовок секции', () => {
     render(<App />)
 
-    expect(screen.getByText('Расходы')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Расходы' })).toBeInTheDocument()
   })
 
   it('отображает логотип в хедере', () => {
