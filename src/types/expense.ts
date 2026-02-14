@@ -15,6 +15,10 @@ export type ExpenseCategory =
   | 'transport'
   | 'health'
   | 'subscriptions'
+  | 'entertainment'
+  | 'beauty'
+  | 'education'
+  | 'sports'
   | 'other'
 
 export type Period = 'days' | 'months' | 'years'
@@ -36,6 +40,10 @@ export const CATEGORIES: CategoryInfo[] = [
   { value: 'transport', label: 'Транспорт', icon: '🚗' },
   { value: 'health', label: 'Здоровье', icon: '💊' },
   { value: 'subscriptions', label: 'Подписки', icon: '📱' },
+  { value: 'entertainment', label: 'Развлечения', icon: '🎮' },
+  { value: 'beauty', label: 'Красота', icon: '💅' },
+  { value: 'education', label: 'Образование', icon: '📚' },
+  { value: 'sports', label: 'Спорт', icon: '🏋️' },
   { value: 'other', label: 'Другое', icon: '📦' },
 ]
 
