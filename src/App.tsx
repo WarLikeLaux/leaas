@@ -1,27 +1,67 @@
+import { useState } from 'react'
+import MobileBlocker from '@/components/MobileBlocker'
+import Layout from '@/components/Layout'
+import Tabs from '@/components/Tabs'
+import ExpenseForm from '@/components/ExpenseForm'
+import ExpenseList from '@/components/ExpenseList'
+import StatisticsView from '@/components/StatisticsView'
+import AnalyticsView from '@/components/AnalyticsView'
+import BudgetView from '@/components/BudgetView'
+import EditExpenseModal from '@/components/EditExpenseModal'
+import { useExpenses } from '@/hooks/useExpenses'
+import type { Expense } from '@/types/expense'
+import s from './App.module.css'
+
+const TABS = [
+  { label: 'Расходы', icon: '💰' },
+  { label: 'Статистика', icon: '📊' },
+  { label: 'Аналитика', icon: '📈' },
+  { label: 'Бюджет', icon: '🎯' },
+  { label: 'Настройки', icon: '⚙️', disabled: true },
+]
+
 function App() {
+  const { expenses, addExpense, updateExpense, removeExpense, replaceExpense } = useExpenses()
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+  const [activeTab, setActiveTab] = useState(0)
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-gray-100 px-6 relative overflow-hidden">
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-
-      <div className="relative z-10 flex flex-col items-center gap-5">
-        <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-border bg-surface text-xs tracking-wide text-gray-400 backdrop-blur-sm animate-[fadeInUp_0.5s_ease_both]">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse shrink-0" />В разработке
-        </div>
-
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tighter text-center animate-[fadeInUp_0.5s_ease_0.1s_both]">
-          Life Expenses
-          <br />
-          <span className="bg-gradient-to-r from-accent via-accent-light to-teal bg-clip-text text-transparent">
-            as a Service
-          </span>
-        </h1>
-
-        <p className="text-base text-gray-500 max-w-sm text-center leading-relaxed animate-[fadeInUp_0.5s_ease_0.2s_both]">
-          Финансовый рентген: узнай реальную стоимость своей жизни.
-        </p>
-      </div>
-    </div>
+    <>
+      <MobileBlocker />
+      <Layout>
+        <section className={s.dashboard}>
+          <div className={s.header}>
+            <h1 className={s.title}>{TABS[activeTab]?.label}</h1>
+            <span className={s.count}>{expenses.length}</span>
+          </div>
+          <Tabs tabs={TABS} activeIndex={activeTab} onChange={setActiveTab} />
+          {activeTab === 0 && (
+            <>
+              <ExpenseForm onAdd={addExpense} />
+              <ExpenseList
+                expenses={expenses}
+                onEdit={setEditingExpense}
+                onRemove={removeExpense}
+              />
+            </>
+          )}
+          {activeTab === 1 && <StatisticsView expenses={expenses} onEdit={setEditingExpense} />}
+          {activeTab === 2 && <AnalyticsView expenses={expenses} />}
+          {activeTab === 3 && (
+            <BudgetView expenses={expenses} onEdit={setEditingExpense} onReplace={replaceExpense} />
+          )}
+        </section>
+      </Layout>
+      {editingExpense && (
+        <EditExpenseModal
+          expense={editingExpense}
+          onSave={updateExpense}
+          onClose={() => setEditingExpense(null)}
+          onRemove={removeExpense}
+          onReplace={replaceExpense}
+        />
+      )}
+    </>
   )
 }
 
