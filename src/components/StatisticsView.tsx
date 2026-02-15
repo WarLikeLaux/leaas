@@ -51,7 +51,10 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
   const filtered = useMemo(() => {
     if (!search.trim()) return expenses
     const q = search.toLowerCase()
-    return expenses.filter((e) => e.name.toLowerCase().includes(q))
+    return expenses.filter((e) => {
+      const cat = getCategoryInfo(e.category)
+      return e.name.toLowerCase().includes(q) || cat.label.toLowerCase().includes(q)
+    })
   }, [expenses, search])
 
   const groups = useMemo(() => groupByCategory(filtered), [filtered])

@@ -20,3 +20,7 @@ export function pluralizeMonths(count: number): string {
 export function pluralizeYears(count: number): string {
   return pluralize(count, 'год', 'года', 'лет')
 }
+
+export function pluralizeExpenses(count: number): string {
+  return pluralize(count, 'расход', 'расхода', 'расходов')
+}
