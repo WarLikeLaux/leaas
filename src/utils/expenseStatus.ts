@@ -1,20 +1,38 @@
 import type { Expense } from '@/types/expense'
 
-export function getEndDate(expense: Expense): Date {
+export function getEndDateMin(expense: Expense): Date {
   const start = new Date(expense.startDate)
-  start.setDate(start.getDate() + expense.lifespanDays)
+  start.setDate(start.getDate() + expense.lifespanDaysMin)
   return start
 }
 
-export function isExpenseActive(expense: Expense): boolean {
-  return getEndDate(expense) > new Date()
+export function getEndDateMax(expense: Expense): Date {
+  const start = new Date(expense.startDate)
+  start.setDate(start.getDate() + expense.lifespanDaysMax)
+  return start
 }
 
-export function getRemainingDays(expense: Expense): number {
-  const end = getEndDate(expense)
+export type ExpenseStatus = 'active' | 'warning' | 'expired'
+
+export function getExpenseStatus(expense: Expense): ExpenseStatus {
   const now = new Date()
-  const diff = end.getTime() - now.getTime()
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
+  if (now > getEndDateMax(expense)) return 'expired'
+  if (now > getEndDateMin(expense)) return 'warning'
+  return 'active'
+}
+
+export function isExpenseActive(expense: Expense): boolean {
+  return getExpenseStatus(expense) !== 'expired'
+}
+
+export function getRemainingDaysRange(expense: Expense): { min: number; max: number } {
+  const now = new Date()
+  const diffMin = getEndDateMin(expense).getTime() - now.getTime()
+  const diffMax = getEndDateMax(expense).getTime() - now.getTime()
+  return {
+    min: Math.max(0, Math.ceil(diffMin / (1000 * 60 * 60 * 24))),
+    max: Math.max(0, Math.ceil(diffMax / (1000 * 60 * 60 * 24))),
+  }
 }
 
 export function formatDate(dateStr: string): string {

@@ -2,8 +2,10 @@ export interface Expense {
   id: string
   name: string
   cost: number
-  lifespanDays: number
-  lifespanValue: number
+  lifespanMin: number
+  lifespanMax: number
+  lifespanDaysMin: number
+  lifespanDaysMax: number
   lifespanPeriod: Period
   category: ExpenseCategory
   startDate: string

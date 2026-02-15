@@ -73,14 +73,14 @@ describe('formatMoney', () => {
 
 describe('formatLifespan', () => {
   it('форматирует дни', () => {
-    expect(formatLifespan(14)).toBe('14 дн.')
+    expect(formatLifespan(14)).toBe('14 дней')
   })
 
   it('форматирует месяцы', () => {
-    expect(formatLifespan(91)).toBe('3 мес.')
+    expect(formatLifespan(91)).toBe('3 месяца')
   })
 
   it('форматирует годы', () => {
-    expect(formatLifespan(730)).toBe('2 г.')
+    expect(formatLifespan(730)).toBe('2 года')
   })
 })
