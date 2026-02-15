@@ -4,6 +4,7 @@ import { todayISO } from '@/utils/expenseStatus'
 import { pluralizeDays, pluralizeMonths, pluralizeYears } from '@/utils/pluralize'
 import { EXPENSE_PRESETS, LIFESPAN_PRESETS } from '@/constants/presets'
 import { CATEGORIES, type Expense, type ExpenseCategory, type Period } from '@/types/expense'
+import s from './ExpenseForm.module.css'
 
 interface ExpenseFormProps {
   onAdd: (expense: Omit<Expense, 'id' | 'createdAt'>) => void
@@ -20,28 +21,33 @@ function getPeriodLabel(period: Period, count: number): string {
 function ExpenseForm({ onAdd }: ExpenseFormProps) {
   const [name, setName] = useState('')
   const [cost, setCost] = useState('')
-  const [lifespanValue, setLifespanValue] = useState('')
+  const [lifespanMin, setLifespanMin] = useState('')
+  const [lifespanMax, setLifespanMax] = useState('')
   const [period, setPeriod] = useState<Period>('months')
   const [category, setCategory] = useState<ExpenseCategory>('other')
   const [presetsOpen, setPresetsOpen] = useState(false)
 
-  const numericLifespan = parseFloat(lifespanValue) || 0
+  const numericLifespan = parseFloat(lifespanMin) || 0
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
 
     const parsedCost = parseFloat(cost)
-    const parsedLifespan = parseFloat(lifespanValue)
+    const parsedMin = parseFloat(lifespanMin)
+    const parsedMax = parseFloat(lifespanMax || lifespanMin)
 
     if (!name.trim()) return
     if (isNaN(parsedCost) || parsedCost <= 0) return
-    if (isNaN(parsedLifespan) || parsedLifespan <= 0) return
+    if (isNaN(parsedMin) || parsedMin <= 0) return
+    if (isNaN(parsedMax) || parsedMax < parsedMin) return
 
     onAdd({
       name: name.trim(),
       cost: parsedCost,
-      lifespanDays: lifespanToDays(parsedLifespan, period),
-      lifespanValue: parsedLifespan,
+      lifespanMin: parsedMin,
+      lifespanMax: parsedMax,
+      lifespanDaysMin: lifespanToDays(parsedMin, period),
+      lifespanDaysMax: lifespanToDays(parsedMax, period),
       lifespanPeriod: period,
       category,
       startDate: todayISO(),
@@ -50,11 +56,13 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
 
     setName('')
     setCost('')
-    setLifespanValue('')
+    setLifespanMin('')
+    setLifespanMax('')
   }
 
   function handleLifespanPreset(preset: (typeof LIFESPAN_PRESETS)[number]) {
-    setLifespanValue(String(preset.value))
+    setLifespanMin(String(preset.value))
+    setLifespanMax(String(preset.value))
     setPeriod(preset.period)
   }
 
@@ -62,8 +70,10 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
     onAdd({
       name: preset.name,
       cost: preset.cost,
-      lifespanDays: preset.lifespanDays,
-      lifespanValue: preset.lifespanValue,
+      lifespanMin: preset.lifespanMin,
+      lifespanMax: preset.lifespanMax,
+      lifespanDaysMin: preset.lifespanDaysMin,
+      lifespanDaysMax: preset.lifespanDaysMax,
       lifespanPeriod: preset.lifespanPeriod,
       category: preset.category,
       startDate: todayISO(),
@@ -72,11 +82,11 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
   }
 
   return (
-    <div className="expense-form-wrapper">
-      <form className="expense-form" onSubmit={handleSubmit}>
-        <div className="form-row">
+    <div className={s.wrapper}>
+      <form className={s.form} onSubmit={handleSubmit}>
+        <div className={s.row}>
           <input
-            className="form-input"
+            className={s.input}
             type="text"
             placeholder="Название"
             value={name}
@@ -84,7 +94,7 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
             required
           />
           <input
-            className="form-input form-input--cost"
+            className={`${s.input} ${s.inputCost}`}
             type="number"
             placeholder="Стоимость, ₽"
             value={cost}
@@ -94,37 +104,46 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
             required
           />
           <input
-            className="form-input form-input--lifespan"
+            className={`${s.input} ${s.inputLifespan}`}
             type="number"
-            placeholder="Срок"
-            value={lifespanValue}
-            onChange={(e) => setLifespanValue(e.target.value)}
+            placeholder="От"
+            value={lifespanMin}
+            onChange={(e) => setLifespanMin(e.target.value)}
             min="0"
             step="any"
             required
           />
-          <div className="form-toggle-group">
+          <input
+            className={`${s.input} ${s.inputLifespan}`}
+            type="number"
+            placeholder="До"
+            value={lifespanMax}
+            onChange={(e) => setLifespanMax(e.target.value)}
+            min="0"
+            step="any"
+          />
+          <div className={s.toggleGroup}>
             {PERIOD_OPTIONS.map((p) => (
               <button
                 key={p}
                 type="button"
-                className={`form-toggle ${period === p ? 'form-toggle--active' : ''}`}
+                className={`${s.toggle} ${period === p ? s.toggleActive : ''}`}
                 onClick={() => setPeriod(p)}
               >
                 {getPeriodLabel(p, numericLifespan)}
               </button>
             ))}
           </div>
-          <button className="form-button" type="submit">
+          <button className={s.button} type="submit">
             Добавить
           </button>
         </div>
-        <div className="form-categories">
+        <div className={s.categories}>
           {CATEGORIES.map((c) => (
             <button
               key={c.value}
               type="button"
-              className={`form-category ${category === c.value ? 'form-category--active' : ''}`}
+              className={`${s.category} ${category === c.value ? s.categoryActive : ''}`}
               onClick={() => setCategory(c.value)}
             >
               <span>{c.icon}</span>
@@ -132,13 +151,13 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
             </button>
           ))}
         </div>
-        <div className="form-lifespan-presets">
-          <span className="form-presets-label">Срок:</span>
+        <div className={s.lifespanPresets}>
+          <span className={s.presetsLabel}>Срок:</span>
           {LIFESPAN_PRESETS.map((preset) => (
             <button
               key={preset.label}
               type="button"
-              className="form-preset"
+              className={s.preset}
               onClick={() => handleLifespanPreset(preset)}
             >
               {preset.label}
@@ -146,23 +165,19 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
           ))}
         </div>
       </form>
-      <div className="form-presets">
-        <button
-          type="button"
-          className="form-presets-toggle"
-          onClick={() => setPresetsOpen((v) => !v)}
-        >
+      <div className={s.presets}>
+        <button type="button" className={s.presetsToggle} onClick={() => setPresetsOpen((v) => !v)}>
           <span>{presetsOpen ? '▼' : '▶'}</span>
           Шаблоны
-          <span className="form-presets-count">{EXPENSE_PRESETS.length}</span>
+          <span className={s.presetsCount}>{EXPENSE_PRESETS.length}</span>
         </button>
         {presetsOpen && (
-          <div className="form-presets-list">
+          <div className={s.presetsList}>
             {EXPENSE_PRESETS.map((preset) => (
               <button
                 key={preset.name}
                 type="button"
-                className="form-preset"
+                className={s.preset}
                 onClick={() => handleExpensePreset(preset)}
               >
                 {preset.name}
