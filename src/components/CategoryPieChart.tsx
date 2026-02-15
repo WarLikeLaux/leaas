@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react'
 import type { Expense } from '@/types/expense'
 import { CATEGORIES } from '@/types/expense'
 import { calculateMonthlyCost, formatMoney } from '@/utils/calculations'
+import s from './CategoryPieChart.module.css'
 
 interface CategoryPieChartProps {
   expenses: Expense[]
@@ -35,7 +36,8 @@ function buildSlices(expenses: Expense[]): Slice[] {
   const totals = new Map<string, number>()
 
   for (const expense of expenses) {
-    const monthly = calculateMonthlyCost(expense.cost, expense.lifespanDays)
+    const avgDays = (expense.lifespanDaysMin + expense.lifespanDaysMax) / 2
+    const monthly = calculateMonthlyCost(expense.cost, avgDays)
     totals.set(expense.category, (totals.get(expense.category) ?? 0) + monthly)
   }
 
@@ -91,12 +93,12 @@ function CategoryPieChart({ expenses }: CategoryPieChartProps) {
 
   if (slices.length === 0) return null
 
-  const total = slices.reduce((sum, s) => sum + s.value, 0)
+  const total = slices.reduce((sum, sl) => sum + sl.value, 0)
 
   return (
-    <div className="pie-chart-wrapper">
-      <div className="pie-chart-container">
-        <svg viewBox="0 0 200 200" className="pie-chart-svg">
+    <div className={s.wrapper}>
+      <div className={s.container}>
+        <svg viewBox="0 0 200 200" className={s.svg}>
           <circle cx="100" cy="100" r="80" fill="var(--color-surface)" />
           <PieSlices slices={slices} />
           <circle cx="100" cy="100" r="50" fill="var(--color-bg)" />
@@ -115,14 +117,14 @@ function CategoryPieChart({ expenses }: CategoryPieChartProps) {
           </text>
         </svg>
       </div>
-      <div className="pie-chart-legend">
+      <div className={s.legend}>
         {slices.map((slice) => (
-          <div key={slice.category} className="pie-chart-legend-item">
-            <span className="pie-chart-legend-color" style={{ background: slice.color }} />
-            <span className="pie-chart-legend-icon">{slice.icon}</span>
-            <span className="pie-chart-legend-label">{slice.label}</span>
-            <span className="pie-chart-legend-value">{formatMoney(slice.value)} ₽</span>
-            <span className="pie-chart-legend-pct">{slice.percentage.toFixed(1)}%</span>
+          <div key={slice.category} className={s.legendItem}>
+            <span className={s.legendColor} style={{ background: slice.color }} />
+            <span className={s.legendIcon}>{slice.icon}</span>
+            <span className={s.legendLabel}>{slice.label}</span>
+            <span className={s.legendValue}>{formatMoney(slice.value)} ₽</span>
+            <span className={s.legendPct}>{slice.percentage.toFixed(1)}%</span>
           </div>
         ))}
       </div>

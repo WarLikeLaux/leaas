@@ -5,10 +5,12 @@ import {
   calculateMonthlyCost,
   calculateYearlyCost,
   formatMoney,
-  formatLifespan,
+  formatMoneyRange,
+  formatLifespanRange,
 } from '@/utils/calculations'
 import { isExpenseActive } from '@/utils/expenseStatus'
 import SearchInput from '@/components/SearchInput'
+import s from './StatisticsView.module.css'
 
 interface StatisticsViewProps {
   expenses: Expense[]
@@ -25,8 +27,21 @@ function groupByCategory(expenses: Expense[]) {
   return groups
 }
 
-function sumMonthly(items: Expense[]): number {
-  return items.reduce((sum, e) => sum + calculateMonthlyCost(e.cost, e.lifespanDays), 0)
+function monthlyRangeForItem(e: Expense): { min: number; max: number } {
+  return {
+    min: calculateMonthlyCost(e.cost, e.lifespanDaysMax),
+    max: calculateMonthlyCost(e.cost, e.lifespanDaysMin),
+  }
+}
+
+function sumMonthlyRange(items: Expense[]): { min: number; max: number } {
+  let min = 0
+  let max = 0
+  for (const e of items) {
+    min += calculateMonthlyCost(e.cost, e.lifespanDaysMax)
+    max += calculateMonthlyCost(e.cost, e.lifespanDaysMin)
+  }
+  return { min, max }
 }
 
 function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
@@ -55,53 +70,58 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
     })
   }
 
-  const burnDaily = active.reduce((sum, e) => sum + calculateDailyCost(e.cost, e.lifespanDays), 0)
-  const burnMonthly = sumMonthly(active)
-  const burnYearly = active.reduce((sum, e) => sum + calculateYearlyCost(e.cost, e.lifespanDays), 0)
+  const burnDaily = {
+    min: active.reduce((sum, e) => sum + calculateDailyCost(e.cost, e.lifespanDaysMax), 0),
+    max: active.reduce((sum, e) => sum + calculateDailyCost(e.cost, e.lifespanDaysMin), 0),
+  }
+  const burnMonthly = sumMonthlyRange(active)
+  const burnYearly = {
+    min: active.reduce((sum, e) => sum + calculateYearlyCost(e.cost, e.lifespanDaysMax), 0),
+    max: active.reduce((sum, e) => sum + calculateYearlyCost(e.cost, e.lifespanDaysMin), 0),
+  }
 
   if (expenses.length === 0) {
     return (
-      <div className="expense-list-empty">
-        <span className="expense-list-empty-icon">📊</span>
+      <div className={s.empty}>
+        <span className={s.emptyIcon}>📊</span>
         <p>Добавьте расходы, чтобы увидеть статистику.</p>
       </div>
     )
   }
 
   return (
-    <div className="statistics">
+    <div className={s.statistics}>
       <SearchInput value={search} onChange={setSearch} />
-      <div className="stats-section-label">Текущий Burn Rate</div>
-      <div className="stats-totals">
-        <div className="stats-total">
-          <span className="stats-total-label">В день</span>
-          <span className="stats-total-value">{formatMoney(burnDaily)} ₽</span>
+      <div className={s.sectionLabel}>Текущий Burn Rate</div>
+      <div className={s.totals}>
+        <div className={s.total}>
+          <span className={s.totalLabel}>В день</span>
+          <span className={s.totalValue}>{formatMoneyRange(burnDaily.min, burnDaily.max)} ₽</span>
         </div>
-        <div className="stats-total">
-          <span className="stats-total-label">В месяц</span>
-          <span className="stats-total-value">{formatMoney(burnMonthly)} ₽</span>
+        <div className={s.total}>
+          <span className={s.totalLabel}>В месяц</span>
+          <span className={s.totalValue}>
+            {formatMoneyRange(burnMonthly.min, burnMonthly.max)} ₽
+          </span>
         </div>
-        <div className="stats-total">
-          <span className="stats-total-label">В год</span>
-          <span className="stats-total-value">{formatMoney(burnYearly)} ₽</span>
+        <div className={s.total}>
+          <span className={s.totalLabel}>В год</span>
+          <span className={s.totalValue}>{formatMoneyRange(burnYearly.min, burnYearly.max)} ₽</span>
         </div>
       </div>
-      <div className="stats-section-label">По категориям</div>
-      <div className="stats-groups">
+      <div className={s.sectionLabel}>По категориям</div>
+      <div className={s.groups}>
         {CATEGORIES.map((cat) => {
           const items = groups.get(cat.value)
           if (!items || items.length === 0) return null
           const isOpen = search.trim() !== '' || expanded.has(cat.value)
-          const catMonthly = items.reduce(
-            (sum, e) => sum + calculateMonthlyCost(e.cost, e.lifespanDays),
-            0,
-          )
+          const catMonthly = sumMonthlyRange(items)
           return (
             <CategoryGroup
               key={cat.value}
               category={cat.value}
               items={items}
-              monthlyTotal={catMonthly}
+              monthlyRange={catMonthly}
               isOpen={isOpen}
               onToggle={() => toggleCategory(cat.value)}
               onEdit={onEdit}
@@ -116,7 +136,7 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
 interface CategoryGroupProps {
   category: ExpenseCategory
   items: Expense[]
-  monthlyTotal: number
+  monthlyRange: { min: number; max: number }
   isOpen: boolean
   onToggle: () => void
   onEdit: (expense: Expense) => void
@@ -125,7 +145,7 @@ interface CategoryGroupProps {
 function CategoryGroup({
   category,
   items,
-  monthlyTotal,
+  monthlyRange,
   isOpen,
   onToggle,
   onEdit,
@@ -133,18 +153,20 @@ function CategoryGroup({
   const info = getCategoryInfo(category)
 
   return (
-    <div className="stats-group">
-      <button className="stats-group-header" onClick={onToggle}>
-        <div className="stats-group-left">
-          <span className="stats-group-arrow">{isOpen ? '▼' : '▶'}</span>
-          <span className="stats-group-icon">{info.icon}</span>
-          <span className="stats-group-name">{info.label}</span>
-          <span className="stats-group-count">{items.length}</span>
+    <div className={s.group}>
+      <button className={s.groupHeader} onClick={onToggle}>
+        <div className={s.groupLeft}>
+          <span className={s.groupArrow}>{isOpen ? '▼' : '▶'}</span>
+          <span className={s.groupIcon}>{info.icon}</span>
+          <span className={s.groupName}>{info.label}</span>
+          <span className={s.groupCount}>{items.length}</span>
         </div>
-        <span className="stats-group-total">{formatMoney(monthlyTotal)} ₽/мес</span>
+        <span className={s.groupTotal}>
+          {formatMoneyRange(monthlyRange.min, monthlyRange.max)} ₽/мес
+        </span>
       </button>
       {isOpen && (
-        <div className="stats-group-items">
+        <div className={s.groupItems}>
           {items.map((expense) => (
             <StatisticsItem key={expense.id} expense={expense} onEdit={onEdit} />
           ))}
@@ -160,17 +182,21 @@ interface StatisticsItemProps {
 }
 
 function StatisticsItem({ expense, onEdit }: StatisticsItemProps) {
-  const daily = calculateDailyCost(expense.cost, expense.lifespanDays)
-  const monthly = calculateMonthlyCost(expense.cost, expense.lifespanDays)
+  const range = monthlyRangeForItem(expense)
+  const daily = {
+    min: calculateDailyCost(expense.cost, expense.lifespanDaysMax),
+    max: calculateDailyCost(expense.cost, expense.lifespanDaysMin),
+  }
 
   return (
-    <button className="stats-item" onClick={() => onEdit(expense)}>
-      <span className="stats-item-name">{expense.name}</span>
-      <span className="stats-item-meta">
-        {formatMoney(expense.cost)} ₽ · {formatLifespan(expense.lifespanDays)}
+    <button className={s.item} onClick={() => onEdit(expense)}>
+      <span className={s.itemName}>{expense.name}</span>
+      <span className={s.itemMeta}>
+        {formatMoney(expense.cost)} ₽ ·{' '}
+        {formatLifespanRange(expense.lifespanDaysMin, expense.lifespanDaysMax)}
       </span>
-      <span className="stats-item-daily">{formatMoney(daily)} ₽/д</span>
-      <span className="stats-item-monthly">{formatMoney(monthly)} ₽/м</span>
+      <span className={s.itemDaily}>{formatMoneyRange(daily.min, daily.max)} ₽/д</span>
+      <span className={s.itemMonthly}>{formatMoneyRange(range.min, range.max)} ₽/м</span>
     </button>
   )
 }
