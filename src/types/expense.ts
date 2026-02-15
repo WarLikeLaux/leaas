@@ -6,6 +6,8 @@ export interface Expense {
   lifespanValue: number
   lifespanPeriod: Period
   category: ExpenseCategory
+  startDate: string
+  replacementCount: number
   createdAt: string
 }
 
@@ -25,8 +27,18 @@ export type ExpenseCategory =
 
 export type Period = 'days' | 'months' | 'years'
 
+export const PERIODS: Period[] = ['days', 'months', 'years']
+
 export const DAYS_IN_MONTH = 30.44
 export const DAYS_IN_YEAR = 365.25
+
+export function isPeriod(value: unknown): value is Period {
+  return typeof value === 'string' && PERIODS.some((p) => p === value)
+}
+
+export function isExpenseCategory(value: unknown): value is ExpenseCategory {
+  return typeof value === 'string' && CATEGORIES.some((c) => c.value === value)
+}
 
 export interface CategoryInfo {
   value: ExpenseCategory
