@@ -7,6 +7,7 @@ import {
   formatMoney,
   formatLifespan,
 } from '@/utils/calculations'
+import { isExpenseActive } from '@/utils/expenseStatus'
 import SearchInput from '@/components/SearchInput'
 
 interface StatisticsViewProps {
@@ -24,6 +25,10 @@ function groupByCategory(expenses: Expense[]) {
   return groups
 }
 
+function sumMonthly(items: Expense[]): number {
+  return items.reduce((sum, e) => sum + calculateMonthlyCost(e.cost, e.lifespanDays), 0)
+}
+
 function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<Set<ExpenseCategory>>(new Set())
@@ -35,6 +40,8 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
   }, [expenses, search])
 
   const groups = useMemo(() => groupByCategory(filtered), [filtered])
+
+  const active = useMemo(() => filtered.filter(isExpenseActive), [filtered])
 
   function toggleCategory(category: ExpenseCategory) {
     setExpanded((prev) => {
@@ -48,18 +55,9 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
     })
   }
 
-  const totalDaily = filtered.reduce(
-    (sum, e) => sum + calculateDailyCost(e.cost, e.lifespanDays),
-    0,
-  )
-  const totalMonthly = filtered.reduce(
-    (sum, e) => sum + calculateMonthlyCost(e.cost, e.lifespanDays),
-    0,
-  )
-  const totalYearly = filtered.reduce(
-    (sum, e) => sum + calculateYearlyCost(e.cost, e.lifespanDays),
-    0,
-  )
+  const burnDaily = active.reduce((sum, e) => sum + calculateDailyCost(e.cost, e.lifespanDays), 0)
+  const burnMonthly = sumMonthly(active)
+  const burnYearly = active.reduce((sum, e) => sum + calculateYearlyCost(e.cost, e.lifespanDays), 0)
 
   if (expenses.length === 0) {
     return (
@@ -73,20 +71,22 @@ function StatisticsView({ expenses, onEdit }: StatisticsViewProps) {
   return (
     <div className="statistics">
       <SearchInput value={search} onChange={setSearch} />
+      <div className="stats-section-label">Текущий Burn Rate</div>
       <div className="stats-totals">
         <div className="stats-total">
           <span className="stats-total-label">В день</span>
-          <span className="stats-total-value">{formatMoney(totalDaily)} ₽</span>
+          <span className="stats-total-value">{formatMoney(burnDaily)} ₽</span>
         </div>
         <div className="stats-total">
           <span className="stats-total-label">В месяц</span>
-          <span className="stats-total-value">{formatMoney(totalMonthly)} ₽</span>
+          <span className="stats-total-value">{formatMoney(burnMonthly)} ₽</span>
         </div>
         <div className="stats-total">
           <span className="stats-total-label">В год</span>
-          <span className="stats-total-value">{formatMoney(totalYearly)} ₽</span>
+          <span className="stats-total-value">{formatMoney(burnYearly)} ₽</span>
         </div>
       </div>
+      <div className="stats-section-label">По категориям</div>
       <div className="stats-groups">
         {CATEGORIES.map((cat) => {
           const items = groups.get(cat.value)
