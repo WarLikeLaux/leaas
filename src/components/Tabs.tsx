@@ -1,3 +1,5 @@
+import s from './Tabs.module.css'
+
 interface Tab {
   label: string
   icon: string
@@ -12,17 +14,17 @@ interface TabsProps {
 
 function Tabs({ tabs, activeIndex, onChange }: TabsProps) {
   return (
-    <nav className="tabs">
+    <nav className={s.tabs}>
       {tabs.map((tab, i) => (
         <button
           key={tab.label}
-          className={`tab ${i === activeIndex ? 'tab--active' : ''} ${tab.disabled ? 'tab--disabled' : ''}`}
+          className={`${s.tab} ${i === activeIndex ? s.active : ''} ${tab.disabled ? s.disabled : ''}`}
           onClick={() => !tab.disabled && onChange(i)}
           disabled={tab.disabled}
         >
-          <span className="tab-icon">{tab.icon}</span>
-          <span className="tab-label">{tab.label}</span>
-          {tab.disabled && <span className="tab-badge">скоро</span>}
+          <span className={s.icon}>{tab.icon}</span>
+          <span className={s.label}>{tab.label}</span>
+          {tab.disabled && <span className={s.badge}>скоро</span>}
         </button>
       ))}
     </nav>

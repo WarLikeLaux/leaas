@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import s from './Layout.module.css'
 
 interface LayoutProps {
   children: ReactNode
@@ -6,16 +7,16 @@ interface LayoutProps {
 
 function Layout({ children }: LayoutProps) {
   return (
-    <div className="layout">
-      <header className="layout-header">
-        <div className="layout-header-inner">
-          <span className="layout-logo">
-            <span className="layout-logo-abbr">LEaaS</span>
-            <span className="layout-logo-full">Life Expenses as a Service</span>
+    <div className={s.layout}>
+      <header className={s.header}>
+        <div className={s.headerInner}>
+          <span className={s.logo}>
+            <span className={s.logoAbbr}>LEaaS</span>
+            <span className={s.logoFull}>Life Expenses as a Service</span>
           </span>
         </div>
       </header>
-      <main className="layout-main">{children}</main>
+      <main className={s.main}>{children}</main>
     </div>
   )
 }

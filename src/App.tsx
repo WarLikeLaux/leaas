@@ -10,6 +10,7 @@ import BudgetView from '@/components/BudgetView'
 import EditExpenseModal from '@/components/EditExpenseModal'
 import { useExpenses } from '@/hooks/useExpenses'
 import type { Expense } from '@/types/expense'
+import s from './App.module.css'
 
 const TABS = [
   { label: 'Расходы', icon: '💰' },
@@ -28,10 +29,10 @@ function App() {
     <>
       <MobileBlocker />
       <Layout>
-        <section className="dashboard">
-          <div className="dashboard-header">
-            <h1 className="dashboard-title">{TABS[activeTab]?.label}</h1>
-            <span className="dashboard-count">{expenses.length}</span>
+        <section className={s.dashboard}>
+          <div className={s.header}>
+            <h1 className={s.title}>{TABS[activeTab]?.label}</h1>
+            <span className={s.count}>{expenses.length}</span>
           </div>
           <Tabs tabs={TABS} activeIndex={activeTab} onChange={setActiveTab} />
           {activeTab === 0 && (

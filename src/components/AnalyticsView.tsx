@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { Expense } from '@/types/expense'
 import { isExpenseActive } from '@/utils/expenseStatus'
 import CategoryPieChart from '@/components/CategoryPieChart'
+import s from './AnalyticsView.module.css'
 
 interface AnalyticsViewProps {
   expenses: Expense[]
@@ -12,16 +13,16 @@ function AnalyticsView({ expenses }: AnalyticsViewProps) {
 
   if (expenses.length === 0) {
     return (
-      <div className="expense-list-empty">
-        <span className="expense-list-empty-icon">📈</span>
+      <div className={s.empty}>
+        <span className={s.emptyIcon}>📈</span>
         <p>Добавьте расходы, чтобы увидеть аналитику.</p>
       </div>
     )
   }
 
   return (
-    <div className="analytics">
-      <div className="stats-section-label">Распределение по категориям</div>
+    <div className={s.analytics}>
+      <div className={s.sectionLabel}>Распределение по категориям</div>
       <CategoryPieChart expenses={active} />
     </div>
   )

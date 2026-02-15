@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import s from './SearchInput.module.css'
 
 interface SearchInputProps {
   value: string
@@ -9,10 +10,10 @@ function SearchInput({ value, onChange }: SearchInputProps) {
   const [focused, setFocused] = useState(false)
 
   return (
-    <div className={`search-input ${focused ? 'search-input--focused' : ''}`}>
-      <span className="search-input-icon">🔍</span>
+    <div className={`${s.wrapper} ${focused ? s.focused : ''}`}>
+      <span className={s.icon}>🔍</span>
       <input
-        className="search-input-field"
+        className={s.field}
         type="text"
         placeholder="Поиск по названию..."
         value={value}
@@ -21,7 +22,7 @@ function SearchInput({ value, onChange }: SearchInputProps) {
         onBlur={() => setFocused(false)}
       />
       {value && (
-        <button className="search-input-clear" onClick={() => onChange('')}>
+        <button className={s.clear} onClick={() => onChange('')}>
           ×
         </button>
       )}
