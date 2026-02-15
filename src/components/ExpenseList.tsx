@@ -6,6 +6,7 @@ import {
   formatMoney,
   formatLifespan,
 } from '@/utils/calculations'
+import { isExpenseActive, getRemainingDays } from '@/utils/expenseStatus'
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -43,6 +44,8 @@ function ExpenseCard({ expense, onEdit, onRemove }: ExpenseCardProps) {
   const monthly = calculateMonthlyCost(expense.cost, expense.lifespanDays)
   const yearly = calculateYearlyCost(expense.cost, expense.lifespanDays)
   const categoryInfo = getCategoryInfo(expense.category)
+  const active = isExpenseActive(expense)
+  const remaining = getRemainingDays(expense)
 
   return (
     <div className="expense-card" onClick={() => onEdit(expense)}>
@@ -67,6 +70,12 @@ function ExpenseCard({ expense, onEdit, onRemove }: ExpenseCardProps) {
         <span className="expense-card-cost">{formatMoney(expense.cost)} ₽</span>
         <span className="expense-card-separator">·</span>
         <span className="expense-card-lifespan">{formatLifespan(expense.lifespanDays)}</span>
+        <span className="expense-card-separator">·</span>
+        <span
+          className={`status-badge-sm ${active ? 'status-badge-sm--active' : 'status-badge-sm--expired'}`}
+        >
+          {active ? `${remaining} дн.` : '⚠ замена'}
+        </span>
       </div>
       <div className="expense-card-breakdown">
         <div className="expense-card-rate">

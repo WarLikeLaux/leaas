@@ -1,5 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { lifespanToDays } from '@/utils/calculations'
+import { isExpenseActive, getRemainingDays } from '@/utils/expenseStatus'
 import { pluralizeDays, pluralizeMonths, pluralizeYears } from '@/utils/pluralize'
 import { LIFESPAN_PRESETS } from '@/constants/presets'
 import { CATEGORIES, type Expense, type ExpenseCategory, type Period } from '@/types/expense'
@@ -9,6 +10,7 @@ interface EditExpenseModalProps {
   onSave: (id: string, data: Omit<Expense, 'id' | 'createdAt'>) => void
   onClose: () => void
   onRemove: (id: string) => void
+  onReplace: (id: string) => void
 }
 
 const PERIOD_OPTIONS: Period[] = ['days', 'months', 'years']
@@ -19,12 +21,19 @@ function getPeriodLabel(period: Period, count: number): string {
   return pluralizeDays(count)
 }
 
-function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseModalProps) {
+function EditExpenseModal({
+  expense,
+  onSave,
+  onClose,
+  onRemove,
+  onReplace,
+}: EditExpenseModalProps) {
   const [name, setName] = useState(expense.name)
   const [cost, setCost] = useState(String(expense.cost))
   const [lifespanValue, setLifespanValue] = useState(String(expense.lifespanValue))
   const [period, setPeriod] = useState<Period>(expense.lifespanPeriod)
   const [category, setCategory] = useState<ExpenseCategory>(expense.category)
+  const [startDate, setStartDate] = useState(expense.startDate)
 
   const numericLifespan = parseFloat(lifespanValue) || 0
 
@@ -53,12 +62,22 @@ function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseMod
       lifespanValue: parsedLifespan,
       lifespanPeriod: period,
       category,
+      startDate,
+      replacementCount: expense.replacementCount,
     })
     onClose()
   }
 
+  const active = isExpenseActive(expense)
+  const remaining = getRemainingDays(expense)
+
   function handleRemove() {
     onRemove(expense.id)
+    onClose()
+  }
+
+  function handleReplace() {
+    onReplace(expense.id)
     onClose()
   }
 
@@ -71,7 +90,19 @@ function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseMod
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Редактирование</h2>
+          <div className="modal-header-left">
+            <h2 className="modal-title">Редактирование</h2>
+            <span
+              className={`status-badge ${active ? 'status-badge--active' : 'status-badge--expired'}`}
+            >
+              {active ? `${remaining} дн. осталось` : 'Требует замены'}
+            </span>
+            {expense.replacementCount > 0 && (
+              <span className="status-badge status-badge--neutral">
+                замен {expense.replacementCount}×
+              </span>
+            )}
+          </div>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
@@ -116,6 +147,16 @@ function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseMod
             </div>
           </div>
           <div className="modal-field">
+            <label className="modal-label">Дата начала</label>
+            <input
+              className="form-input"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+            />
+          </div>
+          <div className="modal-field">
             <label className="modal-label">Срок</label>
             <div className="modal-lifespan-row">
               <input
@@ -157,9 +198,16 @@ function EditExpenseModal({ expense, onSave, onClose, onRemove }: EditExpenseMod
             <button type="button" className="modal-action-delete" onClick={handleRemove}>
               Удалить
             </button>
-            <button className="form-button" type="submit">
-              Сохранить
-            </button>
+            <div className="modal-actions-right">
+              {!active && (
+                <button type="button" className="modal-action-replace" onClick={handleReplace}>
+                  🔄 Заменить
+                </button>
+              )}
+              <button className="form-button" type="submit">
+                Сохранить
+              </button>
+            </div>
           </div>
         </form>
       </div>
