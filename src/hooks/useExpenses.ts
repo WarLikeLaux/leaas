@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Expense } from '@/types/expense'
 import { isPeriod, isExpenseCategory } from '@/types/expense'
+import { lifespanToDays } from '@/utils/calculations'
 
 const STORAGE_KEY = 'leaas-expenses'
 
@@ -8,18 +9,25 @@ function migrateExpense(raw: Record<string, unknown>): Expense {
   const id = String(raw.id ?? crypto.randomUUID())
   const name = String(raw.name ?? '')
   const cost = Number(raw.cost ?? 0)
-  const lifespanDays = Number(raw.lifespanDays ?? 1)
-  const lifespanValue = Number(raw.lifespanValue ?? lifespanDays)
+  const period = isPeriod(raw.lifespanPeriod) ? raw.lifespanPeriod : 'days'
   const createdAt = String(raw.createdAt ?? new Date().toISOString())
   const startDate = String(raw.startDate ?? createdAt.slice(0, 10))
+
+  const oldValue = Number(raw.lifespanValue ?? raw.lifespanDays ?? 1)
+  const lifespanMin = Number(raw.lifespanMin ?? oldValue)
+  const lifespanMax = Number(raw.lifespanMax ?? oldValue)
+  const lifespanDaysMin = Number(raw.lifespanDaysMin ?? lifespanToDays(lifespanMin, period))
+  const lifespanDaysMax = Number(raw.lifespanDaysMax ?? lifespanToDays(lifespanMax, period))
 
   return {
     id,
     name,
     cost,
-    lifespanDays,
-    lifespanValue,
-    lifespanPeriod: isPeriod(raw.lifespanPeriod) ? raw.lifespanPeriod : 'days',
+    lifespanMin,
+    lifespanMax,
+    lifespanDaysMin,
+    lifespanDaysMax,
+    lifespanPeriod: period,
     category: isExpenseCategory(raw.category) ? raw.category : 'other',
     startDate,
     replacementCount: Number(raw.replacementCount ?? 0),
