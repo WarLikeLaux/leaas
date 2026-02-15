@@ -13,6 +13,70 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.buckets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bucket {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bucketHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: var(--color-surface);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.bucketHeader:hover {
+  background: var(--color-surface-hover);
+}
+
+.bucketLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bucketLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bucketSub {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.bucketRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bucketCount {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.bucketArrow {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
 }
 
 .empty {
