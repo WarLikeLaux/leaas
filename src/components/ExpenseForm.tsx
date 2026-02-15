@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { lifespanToDays } from '@/utils/calculations'
+import { todayISO } from '@/utils/expenseStatus'
 import { pluralizeDays, pluralizeMonths, pluralizeYears } from '@/utils/pluralize'
 import { EXPENSE_PRESETS, LIFESPAN_PRESETS } from '@/constants/presets'
 import { CATEGORIES, type Expense, type ExpenseCategory, type Period } from '@/types/expense'
@@ -43,6 +44,8 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
       lifespanValue: parsedLifespan,
       lifespanPeriod: period,
       category,
+      startDate: todayISO(),
+      replacementCount: 0,
     })
 
     setName('')
@@ -63,6 +66,8 @@ function ExpenseForm({ onAdd }: ExpenseFormProps) {
       lifespanValue: preset.lifespanValue,
       lifespanPeriod: preset.lifespanPeriod,
       category: preset.category,
+      startDate: todayISO(),
+      replacementCount: 0,
     })
   }
 
